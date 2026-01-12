@@ -1,0 +1,32 @@
+function partial(fn, ...presetArgs) {
+  return function (...laterArgs) {
+    let laterIndex = 0;
+
+    const finalArgs = presetArgs.map((arg) => {
+      if (arg === partial.placeholder) {
+        return laterArgs[laterIndex++];
+      }
+      return arg;
+    });
+
+    // presetArgs보다 나중 인자가 더 있으면 뒤에 붙임
+    return fn(...finalArgs, ...laterArgs.slice(laterIndex));
+  };
+}
+
+const _ = (partial.placeholder = Symbol("placeholder"));
+
+const greet = (greeting, name, punctuation) =>
+  `${greeting}, ${name}${punctuation}`;
+
+const sayHello = partial(greet, "Hello");
+console.log(sayHello("Kim", "!"));
+// "Hello, Kim!"
+
+const greetKim = partial(greet, _, "Kim");
+console.log(greetKim("Hi", "?"));
+// "Hi, Kim?"
+
+const askKim = partial(greet, _, "Kim", "?");
+console.log(askKim("How are you"));
+// "How are you, Kim?"
